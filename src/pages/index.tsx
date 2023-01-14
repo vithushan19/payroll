@@ -6,7 +6,7 @@ import Image from "next/image";
 import type { HTMLInputTypeAttribute } from "react";
 import { useState } from "react";
 
-import "react-datetime-picker/dist/DateTimePicker.css";
+import Datetime from "react-datetime";
 
 const Home: NextPage = () => {
   const { data: session, status } = useSession();
@@ -99,14 +99,7 @@ function DateInput({ label }: InputProps) {
   return (
     <div>
       <p className="font-bold text-white">{label}</p>
-      <input
-        className="rounded-xl p-4"
-        value={value.toDateString()}
-        type={"datetime-local"}
-        placeholder={`Enter ${label}`}
-        defaultValue={"DS"}
-        onChange={(e) => setValue(new Date(e.target.value))}
-      />
+      <Datetime className="p-4" />
       {/* <DateTimePicker /> */}
     </div>
   );

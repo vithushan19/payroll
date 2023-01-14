@@ -1,15 +1,7 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 /*!
  * https://github.com/arqex/react-datetime
  */
 
-.form-control {
-  padding: 1em;
-  border-radius: 1em;
-}
 .rdt {
   position: relative;
 }
