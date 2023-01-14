@@ -1,8 +1,19 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 import { type NextPage } from "next";
+import { signIn, useSession } from "next-auth/react";
 import Head from "next/head";
-import Link from "next/link";
+import Image from "next/image";
+import type { HTMLInputTypeAttribute } from "react";
+import { useState } from "react";
+import DateTimePicker from "react-datetime-picker";
+
+import "react-datetime-picker/dist/DateTimePicker.css";
 
 const Home: NextPage = () => {
+  const { data: session, status } = useSession();
+
+  const [startDateTime, onChangeStartDateTime] = useState(new Date());
+  const [startEndTime, onChangeEndDateTim] = useState(new Date());
   return (
     <>
       <Head>
@@ -13,36 +24,91 @@ const Home: NextPage = () => {
       <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
           <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
-            Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
+            <span className="text-[hsl(280,100%,70%)]">Roll</span> App
           </h1>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
-              href="https://create.t3.gg/en/usage/first-steps"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">First Steps →</h3>
-              <div className="text-lg">
-                Just the basics - Everything you need to know to set up your
-                database and authentication.
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-1 md:gap-8">
+            {status === "authenticated" && session?.user ? (
+              <div className="justify-items flex flex-col">
+                <p className="text-xl font-bold text-white">
+                  {session.user?.name}
+                </p>
+                {session?.user?.image && (
+                  <Image
+                    alt="user profile image"
+                    src={session.user?.image}
+                    className="w-24 rounded-full"
+                    width={128}
+                    height={128}
+                  />
+                )}
+                <div className="mt-4">
+                  <DateInput label="Start Time" />
+                </div>
+                <div className="mt-4">
+                  <NumberInput label="Break (minutes)" />
+                </div>
+                <div className="mt-4666">
+                  <DateInput label="End Time" />
+                </div>
+                <div className="mt-4 flex w-24 transform cursor-pointer justify-center rounded-xl border-b-4 border-purple-800 bg-purple-500 p-4 font-bold text-white transition-all hover:bg-purple-400">
+                  Save
+                </div>
               </div>
-            </Link>
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
-              href="https://create.t3.gg/en/introduction"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">Documentation →</h3>
-              <div className="text-lg">
-                Learn more about Create T3 App, the libraries it uses, and how
-                to deploy it.
+            ) : (
+              <div className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20">
+                <div className="text-2xl font-bold">
+                  <button onClick={() => signIn("google")}>Sign In</button>
+                </div>
               </div>
-            </Link>
+            )}
           </div>
         </div>
       </main>
     </>
   );
 };
+
+type InputProps = {
+  label: string;
+};
+function NumberInput({ label }: InputProps) {
+  const [value, setValue] = useState("");
+
+  return (
+    <div>
+      <p className="font-bold text-white">{label}</p>
+      <input
+        className="rounded-xl p-4"
+        value={value}
+        type={"number"}
+        placeholder={`Enter ${label}`}
+        onChange={(e) => setValue(e.target.value)}
+      />
+    </div>
+  );
+}
+
+function DateInput({ label }: InputProps) {
+  const [value, setValue] = useState<Date>(new Date());
+
+  return (
+    <div>
+      <p className="text-white">{JSON.stringify(value)}</p>
+      <p className="font-bold text-white">{label}</p>
+      <input
+        className="rounded-xl p-4"
+        value={value.toDateString()}
+        type={"datetime-local"}
+        placeholder={`Enter ${label}`}
+        onChange={(e) => {
+          console.log(e.target.value);
+
+          setValue(new Date(e.target.value));
+        }}
+      />
+      <DateTimePicker />
+    </div>
+  );
+}
 
 export default Home;
