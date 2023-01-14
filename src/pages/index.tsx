@@ -5,7 +5,6 @@ import Head from "next/head";
 import Image from "next/image";
 import type { HTMLInputTypeAttribute } from "react";
 import { useState } from "react";
-import DateTimePicker from "react-datetime-picker/dist/entry.nostyle";
 
 import "react-datetime-picker/dist/DateTimePicker.css";
 
