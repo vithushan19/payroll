@@ -59,6 +59,17 @@ export const authOptions: NextAuthOptions = {
             if (res && res.length > 0 && session.user) {
               const id = res[0]?.id ?? "";
               session.user.id = id;
+            } else {
+              // await fetch(`${BASE_URL}/api/users/createUser`, {
+              //   method: "POST",
+              //   body: JSON.stringify({
+              //     name: session.user?.name,
+              //     email: session.user?.email,
+              //   }),
+              //   headers: {
+              //     "Content-type": "application/json; charset=UTF-8",
+              //   },
+              // });
             }
           });
       }
