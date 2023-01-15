@@ -6,33 +6,21 @@ import Head from "next/head";
 import Image from "next/image";
 import { HTMLInputTypeAttribute, useCallback, useEffect } from "react";
 import { useState } from "react";
+import DatePicker from "react-date-picker/dist/entry.nostyle";
 
 import Datetime from "react-datetime";
+import { AdminView, Shift } from "./api/admin/getAdminView";
 
-type Shift = {
-  id: string;
-  created_at: string;
-  start_time: string;
-  break_minutes: number;
-  end_time: string;
-};
 const Home: NextPage = () => {
   const { data: session, status } = useSession();
   const [data, setData] = useState<Shift[]>([]);
   const fetchData = async () => {
     const BASE_URL = process.env.NEXTAUTH_URL ?? "";
 
-    const response = await fetch(`${BASE_URL}/api/shifts/getShifts`, {
-      method: "POST",
-      body: JSON.stringify({
-        userId: session?.user?.id,
-      }),
-      headers: {
-        "Content-type": "application/json; charset=UTF-8",
-      },
-    });
-    const newData = (await response.json()) as Shift[];
-    setData(newData);
+    const response = await fetch(`${BASE_URL}/api/admin/getAdminView`);
+    const newData: AdminView = (await response.json()) as AdminView;
+
+    setData(newData.shifts);
   };
 
   useEffect(() => {
@@ -65,13 +53,29 @@ const Home: NextPage = () => {
       },
     }).then((res) => fetchData());
   }
-
   const headers = [
-    "Created At",
-    "Start Time",
-    "End Time",
-    "Break (minutes)",
-    "Hours",
+    "Name",
+    moment()
+      .add(moment().day() - ((moment().day() + 6) % 7), "d")
+      .format("ddd MMM DD"),
+    moment()
+      .add(moment().day() - ((moment().day() + 5) % 7), "d")
+      .format("ddd MMM DD"),
+    moment()
+      .add(moment().day() - ((moment().day() + 4) % 7), "d")
+      .format("ddd MMM DD"),
+    moment()
+      .add(moment().day() - ((moment().day() + 3) % 7), "d")
+      .format("ddd MMM DD"),
+    moment()
+      .add(moment().day() - ((moment().day() + 2) % 7), "d")
+      .format("ddd MMM DD"),
+    moment()
+      .add(moment().day() - ((moment().day() + 1) % 7), "d")
+      .format("ddd MMM DD"),
+    moment()
+      .add(moment().day() - (moment().day() % 7), "d")
+      .format("ddd MMM DD"),
   ];
   return (
     <>
@@ -83,32 +87,30 @@ const Home: NextPage = () => {
       <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
           <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
-            <span className="text-[hsl(280,100%,70%)]">My</span> Shifts
+            <span className="text-[hsl(280,100%,70%)]">Admin</span> Portal
           </h1>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-1 md:gap-8">
-            <div className="grid grid-cols-6 rounded-xl bg-purple-700 p-4 text-white">
+            <div className="grid grid-cols-8 rounded-xl bg-purple-900 p-4 text-white">
               {headers.map((header, i) => (
-                <p className="font-bold" key={i}>
+                <p className="w-40 font-bold" key={i}>
                   {header}
                 </p>
               ))}
             </div>
+
             {data.map((shift, i) => (
               <div
                 key={i}
-                className="grid grid-cols-6 rounded-xl bg-purple-700 p-4 text-white"
+                className="grid grid-cols-8 rounded-xl bg-purple-700 p-4 text-white"
               >
-                <p>{moment(shift.created_at).format("LLLL")}</p>
-                <p>{moment(shift.start_time).format("LLLL")}</p>
-                <p>{moment(shift.end_time).format("LLLL")}</p>
-                <p className="">{shift.break_minutes}</p>
-                <p>{getHours(shift)}</p>
-                <div
-                  onClick={() => onDelete(shift.id)}
-                  className="mt-4 flex w-24 cursor-pointer justify-center rounded-xl bg-red-500 p-2 hover:bg-red-600"
-                >
-                  Delete
-                </div>
+                <p className="">{shift.users.name}</p>
+                <p className="">{getHours(shift)}</p>
+                <p className="">{getHours(shift)}</p>
+                <p className="">{getHours(shift)}</p>
+                <p className="">{getHours(shift)}</p>
+                <p className="">{getHours(shift)}</p>
+                <p className="">{getHours(shift)}</p>
+                <p className="">{getHours(shift)}</p>
               </div>
             ))}
           </div>
