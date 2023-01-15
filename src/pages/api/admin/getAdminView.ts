@@ -15,19 +15,23 @@ export type Shift = {
   break_minutes: number;
   start_time: string;
   end_time: string;
+  userId: string;
   created_at: string;
   users: UserData;
 };
 export type AdminView = {
+  userShifts: UserWithShifts[];
+};
+
+export type UserWithShifts = UserData & {
   shifts: Shift[];
-  users: User[];
 };
 
 export default async function handler(
   _req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse<AdminView>
 ) {
-  const { data: shifts, error } = await supabase
+  const { data: shiftData, error } = await supabase
     .from("shifts")
     .select(
       `
@@ -35,30 +39,30 @@ export default async function handler(
   start_time,
   end_time,
   created_at,
+  userId,
   users (
-    name
+    name,
     id
   )
 `
     )
     .gt("start_time", "Jan 1, 2023");
+  const shifts = shiftData as Shift[];
 
-  const { data: users, error: usersError } = await supabase
-    .from("users")
-    .select(
-      `
+  const { data, error: usersError } = await supabase.from("users").select(
+    `
   name,
-  id,
+  id
 `
-    );
+  );
+  const users = data as UserData[];
 
-  return res.status(200).json({ data: "KK" });
+  const userShifts = users?.map((user) => {
+    const shiftsForUser: Shift[] =
+      shifts?.filter((shift) => shift.userId === user.id) ?? [];
+    const userWithShifts: UserWithShifts = { ...user, shifts: shiftsForUser };
+    return userWithShifts;
+  });
+
+  return res.status(200).json({ userShifts });
 }
-
-type User = {
-  users: UserData;
-  created_at: string;
-  end_time: string;
-  start_time: string;
-  break_minutes: number;
-};
