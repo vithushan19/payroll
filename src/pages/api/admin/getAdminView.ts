@@ -20,13 +20,14 @@ export type Shift = {
 };
 export type AdminView = {
   shifts: Shift[];
+  users: User[];
 };
 
 export default async function handler(
   _req: NextApiRequest,
-  res: NextApiResponse<AdminView>
+  res: NextApiResponse
 ) {
-  const { data, error } = await supabase
+  const { data: shifts, error } = await supabase
     .from("shifts")
     .select(
       `
@@ -51,8 +52,7 @@ export default async function handler(
 `
     );
 
-  const usersData: User[] = users as User[];
-  return res.status(200).json({ users });
+  return res.status(200).json({ data: "KK" });
 }
 
 type User = {
