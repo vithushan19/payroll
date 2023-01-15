@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
+import moment, { Moment } from "moment";
 import { type NextPage } from "next";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
@@ -11,8 +12,31 @@ import Datetime from "react-datetime";
 const Home: NextPage = () => {
   const { data: session, status } = useSession();
 
-  const [startDateTime, onChangeStartDateTime] = useState(new Date());
-  const [startEndTime, onChangeEndDateTim] = useState(new Date());
+  const [startDateTime, onChangeStartDateTime] = useState(moment());
+  const [endDateTime, onChangeEndDateTim] = useState(moment());
+  const [breakMinutes, setBreakMinutes] = useState(0);
+
+  const onSave = async () => {
+    const BASE_URL = process.env.NEXTAUTH_URL ?? "";
+    console.log(
+      startDateTime.toISOString(),
+      breakMinutes,
+      endDateTime.toISOString()
+    );
+
+    await fetch(`${BASE_URL}/api/shifts/createShift`, {
+      method: "POST",
+      body: JSON.stringify({
+        start_time: startDateTime.toISOString(),
+        break_minutes: breakMinutes,
+        userId: session?.user?.id,
+        end_time: endDateTime.toISOString(),
+      }),
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+      },
+    });
+  };
   return (
     <>
       <Head>
@@ -47,15 +71,30 @@ const Home: NextPage = () => {
                   />
                 )}
                 <div className="mt-4">
-                  <DateInput label="Start Time" />
+                  <DateInput
+                    label="Start Time"
+                    value={startDateTime}
+                    setValue={onChangeStartDateTime}
+                  />
                 </div>
                 <div className="mt-4">
-                  <NumberInput label="Break (minutes)" />
+                  <NumberInput
+                    label="Break (minutes)"
+                    value={breakMinutes}
+                    setValue={setBreakMinutes}
+                  />
                 </div>
                 <div className="mt-4">
-                  <DateInput label="End Time" />
+                  <DateInput
+                    label="End Time"
+                    value={endDateTime}
+                    setValue={onChangeEndDateTim}
+                  />
                 </div>
-                <div className="mt-4 flex w-24 transform cursor-pointer justify-center rounded-xl border-b-4 border-purple-800 bg-purple-500 p-4 font-bold text-white transition-all hover:bg-purple-400">
+                <div
+                  onClick={onSave}
+                  className="mt-4 flex w-24 transform cursor-pointer justify-center rounded-xl border-b-4 border-purple-800 bg-purple-500 p-4 font-bold text-white transition-all hover:bg-purple-400"
+                >
                   Save
                 </div>
               </div>
@@ -73,12 +112,18 @@ const Home: NextPage = () => {
   );
 };
 
+type NumberInputProps = {
+  label: string;
+  value: number;
+  setValue: (m: number) => void;
+};
+
 type InputProps = {
   label: string;
+  value: Moment;
+  setValue: (m: Moment) => void;
 };
-function NumberInput({ label }: InputProps) {
-  const [value, setValue] = useState("");
-
+function NumberInput({ label, value, setValue }: NumberInputProps) {
   return (
     <div>
       <p className="font-bold text-white">{label}</p>
@@ -87,20 +132,21 @@ function NumberInput({ label }: InputProps) {
         value={value}
         type={"number"}
         placeholder={`Enter ${label}`}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) => setValue(Number.parseInt(e.target.value))}
       />
     </div>
   );
 }
 
-function DateInput({ label }: InputProps) {
-  const [value, setValue] = useState<Date>(new Date());
-
+function DateInput({ label, value, setValue }: InputProps) {
   return (
     <div>
       <p className="font-bold text-white">{label}</p>
-      <Datetime className="p-4" />
-      {/* <DateTimePicker /> */}
+      <Datetime
+        className="p-4"
+        value={value}
+        onChange={(e) => setValue(e as Moment)}
+      />
     </div>
   );
 }
